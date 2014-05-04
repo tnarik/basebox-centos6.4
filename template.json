@@ -9,7 +9,6 @@
       "type": "shell",
       "scripts": [
         "scripts/base.sh",
-        "scripts/chef.sh",
         "scripts/vagrant.sh",
         "scripts/virtualbox.sh",
         "scripts/cleanup.sh",
@@ -23,6 +22,12 @@
           "execute_command": "sudo -S sh '{{ .Path }}'"
         }
       }
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "output": "{{user `output_base`}}/packer_{{.BuildName}}_{{.Provider}}.box"
     }
   ],
   "builders": [
@@ -39,7 +44,7 @@
       "iso_checksum": "{{user `ISOChecksum`}}",
       "iso_checksum_type": "md5",
       "iso_url": "{{user `ISOUrl`}}",
-      "output_directory": "{{user `output_base`}}/output-virtualbox",
+      "output_directory": "{{user `output_base`}}/output-virtualbox-iso",
       "ssh_username": "vagrant",
       "ssh_password": "vagrant",
       "ssh_port": 22,
@@ -64,7 +69,7 @@
       "iso_checksum": "{{user `ISOChecksum`}}",
       "iso_checksum_type": "md5",
       "iso_url": "{{user `ISOUrl`}}",
-      "output_directory": "{{user `output_base`}}/output-vmware",
+      "output_directory": "{{user `output_base`}}/output-vmware-iso",
       "ssh_username": "vagrant",
       "ssh_password": "vagrant",
       "ssh_port": 22,

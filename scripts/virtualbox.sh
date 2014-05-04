@@ -1,8 +1,6 @@
-#yum -y install gcc make gcc-c++ kernel-devel-`uname -r` zlib-devel openssl-devel readline-devel sqlite-devel perl wget dkms nfs-utils
+#rpm -Uhv http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 
-rpm -Uhv http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-
-yum -y install gcc make kernel-devel perl dkms
+yum -y install gcc make kernel-devel-`uname -r` perl #dkms
 
 # Installing the virtualbox guest additions
 cd /tmp

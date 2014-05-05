@@ -16,10 +16,10 @@
       ],
       "override": {
         "virtualbox-iso": {
-          "execute_command": "sudo -S sh '{{ .Path }}'"
+          "execute_command": "{{ .Vars }} sudo -E -S sh '{{ .Path }}'"
         },
         "vmware-iso": {
-          "execute_command": "sudo -S sh '{{ .Path }}'"
+          "execute_command": "{{ .Vars }} sudo -E -S sh '{{ .Path }}'"
         }
       }
     }

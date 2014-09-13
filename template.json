@@ -20,6 +20,9 @@
         },
         "vmware-iso": {
           "execute_command": "{{ .Vars }} sudo -E -S sh '{{ .Path }}'"
+        },
+        "parallels-iso": {
+          "execute_command": "{{ .Vars }} sudo -E -S sh '{{ .Path }}'"
         }
       }
     }
@@ -40,7 +43,7 @@
       "disk_size": 200000,
       "guest_os_type": "RedHat_64",
       "http_directory": "http",
-      "headless": true,
+      "headless": false,
       "iso_checksum": "{{user `ISOChecksum`}}",
       "iso_checksum_type": "md5",
       "iso_url": "{{user `ISOUrl`}}",
@@ -65,7 +68,7 @@
       "disk_size": 200000,
       "guest_os_type": "rhel6-64",
       "http_directory": "http",
-      "headless": true,
+      "headless": false,
       "iso_checksum": "{{user `ISOChecksum`}}",
       "iso_checksum_type": "md5",
       "iso_url": "{{user `ISOUrl`}}",
@@ -80,6 +83,30 @@
         "numvcpus": "1",
         "cpuid.coresPerSocket": "1"
       }
-    }
+    },
+    {
+      "type": "parallels-iso",
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+      ],
+      "boot_wait": "10s",
+      "disk_size": 200000,
+      "guest_os_type": "linux",
+      "guest_os_distribution": "centos",
+      "http_directory": "http",
+      "iso_checksum": "{{user `ISOChecksum`}}",
+      "iso_checksum_type": "md5",
+      "iso_url": "{{user `ISOUrl`}}",
+      "output_directory": "{{user `output_base`}}/output-parallels-iso",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_wait_timeout": "10000s",
+      "shutdown_command": "echo '/sbin/halt -h -p' > shutdown.sh; echo 'vagrant'|sudo -S sh 'shutdown.sh'",
+      "prlctl": [
+        ["set", "{{.Name}}", "--memsize", "480"],
+        ["set", "{{.Name}}", "--cpus", "1"] 
+      ]
+   }
   ]
 }

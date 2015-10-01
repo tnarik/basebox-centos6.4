@@ -1,10 +1,15 @@
 {
   "variables": {
-    "ISOUrl": "http://mirrors.usc.edu/pub/linux/distributions/centos/6.4/isos/x86_64/CentOS-6.4-x86_64-minimal.iso",
+    "ISOUrl": "http://mirror.nsc.liu.se/centos-store/6.4/isos/x86_64/CentOS-6.4-x86_64-minimal.iso",
     "ISOChecksum" : "4a5fa01c81cc300f4729136e28ebe600",
     "output_base": "."
     },
   "provisioners": [
+    {
+      "type": "file",
+      "source": "scripts/el6.patch",
+      "destination": "/tmp/el6.patch"
+    },
     {
       "type": "shell",
       "scripts": [
@@ -15,13 +20,13 @@
         "scripts/zerodisk.sh"
       ],
       "override": {
-        "virtualbox-iso": {
+        "virtualbox": {
           "execute_command": "{{ .Vars }} sudo -E -S sh '{{ .Path }}'"
         },
-        "vmware-iso": {
+        "vmware": {
           "execute_command": "{{ .Vars }} sudo -E -S sh '{{ .Path }}'"
         },
-        "parallels-iso": {
+        "parallels": {
           "execute_command": "{{ .Vars }} sudo -E -S sh '{{ .Path }}'"
         }
       }
@@ -30,11 +35,13 @@
   "post-processors": [
     {
       "type": "vagrant",
-      "output": "{{user `output_base`}}/packer_{{.BuildName}}_{{.Provider}}.box"
+      "output": "{{ user `output_base` }}/vagrant/centos6.4-{{ .BuildName }}.box",
+      "keep_input_artifact": true
     }
   ],
   "builders": [
     {
+      "name": "virtualbox",
       "type": "virtualbox-iso",
       "boot_command": [
         "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
@@ -44,67 +51,78 @@
       "guest_os_type": "RedHat_64",
       "http_directory": "http",
       "headless": false,
-      "iso_checksum": "{{user `ISOChecksum`}}",
+      "iso_checksum": "{{ user `ISOChecksum` }}",
       "iso_checksum_type": "md5",
-      "iso_url": "{{user `ISOUrl`}}",
-      "output_directory": "{{user `output_base`}}/output-virtualbox-iso",
+      "iso_url": "{{ user `ISOUrl` }}",
+      "output_directory": "{{ user `output_base` }}/output-virtualbox",
       "ssh_username": "vagrant",
       "ssh_password": "vagrant",
       "ssh_port": 22,
       "ssh_wait_timeout": "10000s",
+      "ssh_pty" : true,
       "shutdown_command": "echo '/sbin/halt -h -p' > /tmp/shutdown.sh; echo 'vagrant'|sudo -S sh '/tmp/shutdown.sh'",
       "guest_additions_path": "VBoxGuestAdditions.iso",
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name" : "packer-centos6.4",
       "vboxmanage": [
-        [ "modifyvm", "{{ .Name }}", "--memory", "480" ],
+        [ "modifyvm", "{{ .Name }}", "--memory", "768" ],
         [ "modifyvm", "{{ .Name }}", "--cpus", "1" ]
       ]
     },
     {
+      "name": "vmware",
       "type": "vmware-iso",
       "boot_command": [
         "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
       ],
       "boot_wait": "10s",
       "disk_size": 200000,
+      "headless": false,
       "guest_os_type": "rhel6-64",
       "http_directory": "http",
-      "headless": false,
-      "iso_checksum": "{{user `ISOChecksum`}}",
+      "iso_checksum": "{{ user `ISOChecksum` }}",
       "iso_checksum_type": "md5",
-      "iso_url": "{{user `ISOUrl`}}",
-      "output_directory": "{{user `output_base`}}/output-vmware-iso",
+      "iso_url": "{{ user `ISOUrl` }}",
+      "output_directory": "{{ user `output_base` }}/output-vmware",
       "ssh_username": "vagrant",
       "ssh_password": "vagrant",
       "ssh_port": 22,
       "ssh_wait_timeout": "10000s",
+      "ssh_pty" : true,
       "shutdown_command": "echo '/sbin/halt -h -p' > shutdown.sh; echo 'vagrant'|sudo -S sh 'shutdown.sh'",
+      "tools_upload_flavor": "linux",
+      "tools_upload_path": "VMWareTools.iso",
+      "vm_name" : "packer-centos6.4",
       "vmx_data": {
-        "memsize": "480",
+        "memsize": "768",
         "numvcpus": "1",
         "cpuid.coresPerSocket": "1"
       }
     },
     {
+      "name": "parallels",
       "type": "parallels-iso",
       "boot_command": [
         "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
       ],
       "boot_wait": "10s",
       "disk_size": 200000,
-      "guest_os_type": "linux",
-      "guest_os_distribution": "centos",
+      "headless": false,
+      "guest_os_type": "centos",
       "http_directory": "http",
-      "iso_checksum": "{{user `ISOChecksum`}}",
+      "iso_checksum": "{{ user `ISOChecksum` }}",
       "iso_checksum_type": "md5",
-      "iso_url": "{{user `ISOUrl`}}",
-      "output_directory": "{{user `output_base`}}/output-parallels-iso",
+      "iso_url": "{{ user `ISOUrl` }}",
+      "output_directory": "{{ user `output_base` }}/output-parallels",
       "ssh_username": "vagrant",
       "ssh_password": "vagrant",
       "ssh_port": 22,
       "ssh_wait_timeout": "10000s",
+      "ssh_pty" : true,
       "shutdown_command": "echo '/sbin/halt -h -p' > shutdown.sh; echo 'vagrant'|sudo -S sh 'shutdown.sh'",
+      "parallels_tools_flavor": "lin",
       "prlctl": [
-        ["set", "{{.Name}}", "--memsize", "480"],
+        ["set", "{{.Name}}", "--memsize", "768"],
         ["set", "{{.Name}}", "--cpus", "1"] 
       ]
    }
